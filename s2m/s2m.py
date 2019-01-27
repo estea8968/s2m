@@ -44,7 +44,7 @@ class S2M:
     """
     This is the main class for s2m. It instantiates the http server
     and provides the processing for all messages coming from Scratch and
-    the micro:bit. It will start a poll watchdog timer to automatically
+    the bpi-bit. It will start a poll watchdog timer to automatically
     shutdown Scratch if scratch is invoked using the auto launch feature.
     """
 
@@ -58,7 +58,7 @@ class S2M:
 
         :param client: scratch or no_client. The no_client option if to manually
                        launch scratch.
-        :param com_port: com port the micro:bit is connected to
+        :param com_port: com port the bpi-bit is connected to
         :param scratch_executable: path to scratch executable
         :param base_path: python path to s2m installation
         :param display_base_path: show the base path and exit.
@@ -81,7 +81,7 @@ class S2M:
         # the name of the scratch .sb2 that will be launched with auto-launch
         self.scratch_project = None
 
-        # instance of pyserial used to communicate with the micro:bit
+        # instance of pyserial used to communicate with the bpi-bit
         self.ser = None
 
         # remember the last accelerometer z value to determine if shaken
@@ -167,8 +167,7 @@ class S2M:
             detected = None
             for device in locations:
                 try:
-                    self.micro_bit_serial = serial.Serial(port=device, baudrate=115200,
-                                                          timeout=.1)
+                    self.micro_bit_serial = serial.Serial(port=device, baudrate=115200,timeout=0.1)
                     detected = device
                     break
                 except serial.SerialException:
@@ -222,7 +221,7 @@ class S2M:
         sent_time = time.time()
         while not self.micro_bit_serial.inWaiting():
             if time.time() - sent_time > 2:
-                print('Unable to retrieve version s2mb.py on the micro:bit.')
+                print('Unable to retrieve version s2mb.py on the bpi-bit.')
                 print('Have you flashed the latest version?')
                 sys.exit(0)
 
@@ -289,14 +288,14 @@ class S2M:
 
         if self.scratch_executable == 'default':
             if sys.platform.startswith('win32'):
-                self.scratch_executable = "C:/Program Files (x86)/Scratch 2/Scratch 2.exe"
+                self.scratch_executable = "C:/Program Files (x86)/Scratch 2/Scratch 2.exe "
             elif sys.platform.startswith('darwin'):
                 self.scratch_executable = "/Applications/Scratch\ 2.app/Contents/MacOS/Scratch\ 2"
             else:
                 self.scratch_executable = "/opt/Scratch\ 2/bin/Scratch\ 2"
 
         if self.language == '0':
-            self.scratch_project = self.base_path + "/scratch_files/projects/s2m.sb2"
+            self.scratch_project = self.base_path + "/scratch_files/projects/s2m_bpibit.sb2"
         elif self.language == '1':
             self.scratch_project = self.base_path + "/scratch_files/projects/s2m_ja.sb2"
         elif self.language == 'ja':
@@ -308,7 +307,7 @@ class S2M:
         elif self.language == '3':
             self.scratch_project = self.base_path + "/scratch_files/projects/s2m_tw.sb2"
         elif self.language == 'tw':
-            self.scratch_project = self.base_path + "/scratch_files/projects/s2m_tw.sb2"
+            self.scratch_project = self.base_path + "/scratch_files/projects/s2m_bpibit.sb2"
         elif self.language == '4':
             self.scratch_project = self.base_path + "/scratch_files/projects/motion_tw.sb2"
         elif self.language == 'tws':
@@ -352,19 +351,21 @@ class S2M:
     # noinspection PyArgumentList
     def handle_poll(self):
         """
-        This method sends a poll request to the micro:bit
+        This method sends a poll request to the bpi-bit
         :return: sensor data
         """
         self.ignore_poll = True
         resp = self.send_command('g')
+        print(resp)
         resp = resp.lower()
         reply = resp.split(',')
 
         # if this reply is not the correct length, just toss it.
-        if len(reply) > 12:
+        if len(reply) > 15:
             return ''
 
         resp = self.build_poll_response(reply)
+        print(resp)
         return resp
 
     def handle_display_image(self, data):
@@ -388,9 +389,8 @@ class S2M:
 
         :param data: text to scroll
         """
-
         data = self.scratch_fix(data)
-        self.send_command('s,' + data)
+        self.send_command('s,' + data )
 
     def handle_write_pixel(self, data):
         """
@@ -422,6 +422,13 @@ class S2M:
         """
         self.send_command('a,' + data)
 
+    ### estea set led color
+    #def handle_set_color(self, data):
+    #    """
+    #    This method is set rgb led color
+    #    """
+    #    self.send_command('co,' +data )
+
     def handle_reset_all(self):
         """
         This method is called when scratch issues a reset_all command.
@@ -444,7 +451,7 @@ class S2M:
 
     def build_poll_response(self, data_list):
         """
-        Build an HTTP response from the raw micro:bit sensor data.
+        Build an HTTP response from the raw bpi-bit sensor data.
 
         :param data_list: raw data received from s2mb.py
         :return: response string
@@ -454,6 +461,7 @@ class S2M:
         reply = ''
 
         # build gestures
+        print(data_list)
         x = int(data_list[0])
         y = int(data_list[1])
         z = int(data_list[2])
@@ -499,13 +507,20 @@ class S2M:
         reply += 'analog_read/0 ' + data_list[8] + '\n'
         reply += 'analog_read/1 ' + data_list[9] + '\n'
         reply += 'analog_read/2 ' + data_list[10] + '\n'
+        ### estea add temperature 2018-12-26
+        reply += 'temperature ' + data_list[11] + '\n'
+        reply += 'l_light ' + data_list[12] + '\n'
+        reply += 'r_light ' + data_list[13] + '\n'
+        #reply += 'color_red ' + data_list[14] + '\n'
+        #reply += 'color_green ' + data_list[15] + '\n'
+        #reply += 'color_blue ' + data_list[16] + '\n'
 
         return reply
 
     def send_command(self, command):
         """
-        Send a command to the micro:bit over the serial interface
-        :param command: command sent to micro:bit
+        Send a command to the bpi-bit over the serial interface
+        :param command: command sent to bpi-bit
         :return: If the command is a poll request, return the poll response
         """
 
@@ -577,7 +592,7 @@ def main():
                              "\n7 or es = Spanish" \
                              "\n8 or ess = Spanish Sample Project" \
                              "\n9 or heb = Hebrew")
-    parser.add_argument("-p", dest="comport", default="None", help="micro:bit COM port - e.g. /dev/ttyACMO or COM3")
+    parser.add_argument("-p", dest="comport", default="None", help="bpi-bit COM port - e.g. /dev/ttyACMO or COM3")
     parser.add_argument("-r", dest="rpi", default="None", help="Set to TRUE to run on a Raspberry Pi")
     parser.add_argument("-s", dest="scratch_exec", default="default", help="Full path to Scratch executable")
 
