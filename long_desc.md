@@ -1,6 +1,6 @@
 
 s2m is a Python program that acts as a bridge between the Scratch 2 off-line editor
- and the micro:bit computer. It allows you to easily create Scratch programs that interact with the micro:bit.
+ and the bpi-bit computer. It allows you to easily create Scratch programs that interact with the micro:bit.
 
 MAJOR FEATURES:
 
