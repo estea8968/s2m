@@ -17,15 +17,15 @@ setup(
             's2m = s2m.s2m:main'
         ]
     },
-    url='https://github.com/MrYsLab/s2m',
-    download_url='https://github.com/MrYsLab/s2m',
+    url='https://github.com/estea8968/s2m',
+    download_url='https://github.com/estea8968/s2m',
     license='GNU Affero General Public License v3 (AGPLv3+)',
-    author='Alan Yorinks',
-    author_email='MisterYsLab@gmail.com',
-    description='A Scratch 2.0 (Offline) Hardware Extension for micro:bit',
+    author='estea8968 Chen',
+    author_email='estea8968@gmail.com',
+    description='A Scratch 2.0 (Offline) Hardware Extension for bpi-bit',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    keywords=['micro:bit', 'microbit', 'Scratch'],
+    keywords=['bpi-bit', 'bpibit', 'Scratch'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Other Environment',
