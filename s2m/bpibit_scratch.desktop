@@ -1,0 +1,18 @@
+[Desktop Entry]
+Name=bpibit_Scratch 2
+Name[zh_TW]=開放硬體計_bpibit_Scratch 2
+Comment=<>
+enericName=bpibit_Scratch 2
+Exec=/opt/s2m/s2m/bpibit.sh 
+Type=Application
+Terminal=false
+Icon=scratch2
+Terminal=true 
+StartupNotify=true
+X-Ubuntu-Gettext-Domain=terminator
+X-KDE-StartupNotify=false
+MimeType=application/x-scratch2
+Categories=Utility;
+X-AppInstall-Package=edu.media.mit.scratch2editor
+X-AppInstall-Section=main
+
